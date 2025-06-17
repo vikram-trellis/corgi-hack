@@ -1,10 +1,10 @@
 {
-  "/not-found": "app/not-found.js",
+  "/claims/page": "app/claims/page.js",
+  "/api/trpc/[trpc]/route": "app/api/trpc/[trpc]/route.js",
+  "/page": "app/page.js",
   "/claims/new/page": "app/claims/new/page.js",
+  "/policyholders/new/page": "app/policyholders/new/page.js",
   "/claims/[id]/page": "app/claims/[id]/page.js",
   "/policyholders/page": "app/policyholders/page.js",
-  "/inbox/page": "app/inbox/page.js",
-  "/api/trpc/[trpc]/route": "app/api/trpc/[trpc]/route.js",
-  "/claims/page": "app/claims/page.js",
-  "/page": "app/page.js"
+  "/inbox/page": "app/inbox/page.js"
 }
