@@ -54,25 +54,21 @@ Claims are reviewed against the policy's terms and conditions. An example policy
       "zip": "9401"
     }
   },
-  "coverage": [
-    {
-      "type": "Comprehensive",
-      "coverage_limit": 25000,
-      "deductible": 500,
-      "covered_events": [
-        "theft",
-        "vandalism",
-        "fire",
-        "natural_disaster",
-        "falling_object",
-        "animal_collision"
-      ], 
-      "exclusions": [
-        "driver_under_influence",
-        "intentional_damage",
-        "commercial_use"
-      ]
-    }
+  "type": "Comprehensive",
+  "coverage_limit": 25000,
+  "deductible": 500,
+  "covered_events": [
+    "theft",
+    "vandalism",
+    "fire",
+    "natural_disaster",
+    "falling_object",
+    "animal_collision"
+  ], 
+  "exclusions": [
+    "driver_under_influence",
+    "intentional_damage",
+    "commercial_use"
   ]
 }
 ```
