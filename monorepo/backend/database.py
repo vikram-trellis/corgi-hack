@@ -77,6 +77,3 @@ db_manager = DatabaseManager(
 
 get_async_session = db_manager.get_async_session
 get_async_session_temp = db_manager.get_async_session_temp
-
-# Type annotation for dependency injection
-AsyncSessionDep = Annotated[AsyncSession, Depends(get_async_session)]

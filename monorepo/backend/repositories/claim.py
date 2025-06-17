@@ -1,20 +1,21 @@
 from typing import List, Optional, Dict, Any, Tuple
-from sqlmodel import Session, select, and_, or_, func
+from sqlmodel import select, and_, or_, func
 from fastapi import Depends
 import logging
 import uuid
 from datetime import date, datetime
 
-from database import AsyncSessionDep
+from database import get_async_session
 from models import Claim, PolicyHolder, EventType, ClaimStatus
 from .base import BaseRepository
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 class ClaimRepository(BaseRepository[Claim]):
     """Repository for managing insurance claims"""
     
-    def __init__(self, session: AsyncSessionDep):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)):
         super().__init__(session, Claim)
     
     async def get_by_claim_id(self, claim_id: str) -> Optional[Claim]:
@@ -33,7 +34,7 @@ class ClaimRepository(BaseRepository[Claim]):
     
     async def search_claims(
         self,
-        policyholder_id: Optional[str] = None,
+        id: Optional[str] = None,
         policy_id: Optional[str] = None,
         status: Optional[str] = None,
         event_type: Optional[str] = None,
@@ -47,7 +48,7 @@ class ClaimRepository(BaseRepository[Claim]):
         Search for claims with various filters
         
         Args:
-            policyholder_id: Filter by policyholder ID
+            id: Filter by policyholder ID
             policy_id: Filter by policy ID
             status: Filter by claim status
             event_type: Filter by event type
@@ -63,8 +64,8 @@ class ClaimRepository(BaseRepository[Claim]):
         filters = []
         
         # Apply filters
-        if policyholder_id:
-            filters.append(Claim.policyholder_id == policyholder_id)
+        if id:
+            filters.append(Claim.id == id)
             
         if policy_id:
             filters.append(Claim.policy_id == policy_id)
@@ -181,7 +182,7 @@ class ClaimRepository(BaseRepository[Claim]):
         
         Args:
             claim_id: The claim ID
-            policyholder_id: The policyholder ID
+            id: The policyholder ID
             policy_id: Optional policy ID
             matched_by: How the match was determined
             
@@ -205,3 +206,31 @@ class ClaimRepository(BaseRepository[Claim]):
         await self.session.refresh(claim)
         
         return claim
+    
+    async def delete_claim(self, claim_id: str) -> bool:
+        """
+        Delete a claim
+        
+        Args:
+            claim_id: The claim ID to delete
+            
+        Returns:
+            True if deleted successfully, False if not found
+        """
+        try:
+            claim = await self.get_by_claim_id(claim_id)
+            if not claim:
+                logger.warning(f"Claim with ID {claim_id} not found for deletion")
+                return False
+            
+            # Delete the claim
+            await self.session.delete(claim)
+            await self.session.commit()
+            
+            logger.info(f"Deleted claim {claim_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error deleting claim {claim_id}: {str(e)}")
+            await self.session.rollback()
+            return False

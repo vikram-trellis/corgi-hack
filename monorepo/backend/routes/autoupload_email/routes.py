@@ -33,7 +33,7 @@ async def get_autoupload_emails(
         List of autoupload email configurations
     """
     # First verify the policy holder exists
-    policy_holder = await policy_holder_repo.get_by_policyholder_id(policy_holder_id)
+    policy_holder = await policy_holder_repo.get_by_id(policy_holder_id)
     if not policy_holder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
@@ -76,7 +76,7 @@ async def get_autoupload_email_by_alias(
         The requested autoupload email configuration
     """
     # First verify the policy holder exists
-    policy_holder = await policy_holder_repo.get_by_policyholder_id(policy_holder_id)
+    policy_holder = await policy_holder_repo.get_by_id(policy_holder_id)
     if not policy_holder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
@@ -126,7 +126,7 @@ async def upsert_autoupload_email(
         The created or updated configuration
     """
     # First verify the policy holder exists
-    policy_holder = await policy_holder_repo.get_by_policyholder_id(policy_holder_id)
+    policy_holder = await policy_holder_repo.get_by_id(policy_holder_id)
     if not policy_holder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
@@ -179,7 +179,7 @@ async def delete_autoupload_email(
         The deleted configuration
     """
     # First verify the policy holder exists
-    policy_holder = await policy_holder_repo.get_by_policyholder_id(policy_holder_id)
+    policy_holder = await policy_holder_repo.get_by_id(policy_holder_id)
     if not policy_holder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 

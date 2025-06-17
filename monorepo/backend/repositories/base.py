@@ -1,7 +1,6 @@
 from typing import Generic, TypeVar, Type, List, Optional, Dict, Any, Union
 from sqlmodel import SQLModel, select, update
 from sqlmodel.ext.asyncio.session import AsyncSession
-from database import AsyncSessionDep
 
 T = TypeVar('T', bound=SQLModel)
 
@@ -37,6 +36,8 @@ class BaseRepository(Generic[T]):
             db_obj = self.model(**data)
         else:
             db_obj = self.model(**data.model_dump())
+
+        print(db_obj)
             
         self.session.add(db_obj)
         await self.session.commit()

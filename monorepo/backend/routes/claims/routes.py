@@ -13,7 +13,6 @@ from schemas.claims import (
     ClaimListResponse,
     ClaimDetailResponse,
 )
-from database import AsyncSessionDep
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +26,8 @@ router = APIRouter(prefix="/claims", tags=["claims"])
 )
 async def create_claim(
     claim: ClaimCreate,
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
-    policyholder_repo: PolicyHolderRepository = Depends(PolicyHolderRepository),
+    claim_repo: ClaimRepository = Depends(),
+    policyholder_repo: PolicyHolderRepository = Depends(),
 ):
     """
     Create a new insurance claim.
@@ -46,7 +45,7 @@ async def create_claim(
         
         # Check if policyholder exists if ID is provided
         if claim.policyholder_id:
-            policyholder = await policyholder_repo.get_by_policyholder_id(claim.policyholder_id)
+            policyholder = await policyholder_repo.get_by_id(claim.policyholder_id)
             if not policyholder:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -54,6 +53,7 @@ async def create_claim(
                 )
         
         # Create the claim
+        print(claim_data)
         created_claim = await claim_repo.create_claim(claim_data)
         
         return ClaimDetailResponse(
@@ -74,7 +74,7 @@ async def create_claim(
     summary="List and search claims"
 )
 async def list_claims(
-    policyholder_id: Optional[str] = None,
+    id: Optional[str] = None,
     policy_id: Optional[str] = None,
     status: Optional[str] = None,
     event_type: Optional[str] = None,
@@ -83,13 +83,13 @@ async def list_claims(
     date_to: Optional[date] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
+    claim_repo: ClaimRepository = Depends(),
 ):
     """
     List and search claims with various filters.
     
     Args:
-        policyholder_id: Filter by policyholder ID
+        id: Filter by policyholder ID
         policy_id: Filter by policy ID
         status: Filter by claim status
         event_type: Filter by event type
@@ -106,7 +106,7 @@ async def list_claims(
         
         # Search claims
         claims, total = await claim_repo.search_claims(
-            policyholder_id=policyholder_id,
+            id=id,
             policy_id=policy_id,
             status=status,
             event_type=event_type,
@@ -144,7 +144,7 @@ async def list_claims(
 )
 async def get_claim(
     claim_id: str,
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
+    claim_repo: ClaimRepository = Depends(),
 ):
     """
     Get details for a specific claim.
@@ -187,7 +187,7 @@ async def get_claim(
 async def update_claim(
     claim_id: str,
     claim: ClaimUpdate,
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
+    claim_repo: ClaimRepository = Depends(),
 ):
     """
     Update a claim.
@@ -240,7 +240,7 @@ async def update_claim_status(
     claim_id: str,
     status: str = Body(..., embed=True),
     metadata: Optional[dict] = Body(None, embed=True),
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
+    claim_repo: ClaimRepository = Depends(),
 ):
     """
     Update a claim's status.
@@ -256,7 +256,8 @@ async def update_claim_status(
     try:
         
         # Validate status
-        if status not in [s for s in dir(ClaimStatus) if not s.startswith("_")]:
+        if status not in [s for s in [ClaimStatus.DRAFT, ClaimStatus.SUBMITTED, ClaimStatus.PENDING_REVIEW, ClaimStatus.UNDER_INVESTIGATION, ClaimStatus.APPROVED, ClaimStatus.PARTIALLY_APPROVED, ClaimStatus.DENIED, ClaimStatus.CLOSED, ClaimStatus.REOPENED] if not s.startswith("_")]:
+            print("Invalid status: {}".format(status))
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid status: {status}"
@@ -265,6 +266,7 @@ async def update_claim_status(
         # Update status
         updated_claim = await claim_repo.update_claim_status(claim_id, status, metadata)
         if not updated_claim:
+            print("Claim with ID {} not found".format(claim_id))
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Claim with ID {claim_id} not found"
@@ -291,18 +293,18 @@ async def update_claim_status(
 )
 async def associate_claim(
     claim_id: str,
-    policyholder_id: str = Body(..., embed=True),
+    id: str = Body(..., embed=True),
     policy_id: Optional[str] = Body(None, embed=True),
     matched_by: Optional[str] = Body(None, embed=True),
-    claim_repo: ClaimRepository = Depends(ClaimRepository),
-    policyholder_repo: PolicyHolderRepository = Depends(PolicyHolderRepository),
+    claim_repo: ClaimRepository = Depends(),
+    policyholder_repo: PolicyHolderRepository = Depends(),
 ):
     """
     Associate a claim with a policyholder.
     
     Args:
         claim_id: The claim ID
-        policyholder_id: The policyholder ID
+        id: The policyholder ID
         policy_id: Optional policy ID
         matched_by: How the match was determined
         
@@ -312,17 +314,17 @@ async def associate_claim(
     try:
         
         # Check if policyholder exists
-        policyholder = await policyholder_repo.get_by_policyholder_id(policyholder_id)
+        policyholder = await policyholder_repo.get_by_id(id)
         if not policyholder:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Policyholder with ID {policyholder_id} not found"
+                detail=f"Policyholder with ID {id} not found"
             )
         
         # Associate claim
         updated_claim = await claim_repo.associate_with_policyholder(
             claim_id=claim_id,
-            policyholder_id=policyholder_id,
+            id=id,
             policy_id=policy_id,
             matched_by=matched_by
         )
@@ -335,7 +337,7 @@ async def associate_claim(
         
         return ClaimDetailResponse(
             success=True,
-            message=f"Claim associated with policyholder {policyholder_id}",
+            message=f"Claim associated with policyholder {id}",
             data=updated_claim
         )
     except HTTPException:
@@ -345,4 +347,52 @@ async def associate_claim(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error associating claim with policyholder: {str(e)}"
+        )
+
+@router.delete(
+    "/{claim_id}",
+    response_model=ClaimResponse,
+    summary="Delete a claim"
+)
+async def delete_claim(
+    claim_id: str,
+    claim_repo: ClaimRepository = Depends(),
+):
+    """
+    Delete a claim.
+    
+    Args:
+        claim_id: The claim ID to delete
+        
+    Returns:
+        Success message
+    """
+    try:
+        # Check if claim exists first
+        existing_claim = await claim_repo.get_by_claim_id(claim_id)
+        if not existing_claim:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Claim with ID {claim_id} not found"
+            )
+        
+        # Delete the claim
+        deleted = await claim_repo.delete_claim(claim_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete claim with ID {claim_id}"
+            )
+        
+        return ClaimResponse(
+            success=True,
+            message=f"Claim {claim_id} deleted successfully"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting claim {claim_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting claim: {str(e)}"
         )

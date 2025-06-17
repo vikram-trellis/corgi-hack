@@ -4,14 +4,14 @@ from sqlmodel import select, and_
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import Depends
 
-from database import AsyncSessionDep
+from database import get_async_session
 from models import AutouploadEmail, PolicyHolder
 from .base import BaseRepository
 
 class AutouploadEmailRepository(BaseRepository[AutouploadEmail]):
     """Repository for managing AutouploadEmail entities"""
     
-    def __init__(self, session: AsyncSession = Depends(AsyncSessionDep)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)):
         super().__init__(session, AutouploadEmail)
     
     async def get(
@@ -74,7 +74,7 @@ class AutouploadEmailRepository(BaseRepository[AutouploadEmail]):
                 
                 if policy_holder:
                     # Check if the format matches alias-policyholderId@domain
-                    expected_local_part = f"{email_record.alias}-{policy_holder.policyholder_id.lower()}"
+                    expected_local_part = f"{email_record.alias}-{policy_holder.id.lower()}"
                     if local_part.lower() == expected_local_part:
                         email_records.append(email_record)
         

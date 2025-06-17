@@ -20,8 +20,7 @@ class PolicyHolderCreate(PolicyHolderBase):
 
 class PolicyHolderRead(PolicyHolderBase):
     """Schema for reading a PolicyHolder, includes all fields including generated ones"""
-    id: int
-    policyholder_id: str
+    id: str
     linked_policies: List[str]
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -36,3 +35,10 @@ class PolicyHolderUpdate(SQLModel):
     address: Optional[Address] = None
     linked_policies: Optional[List[str]] = None
     status: Optional[str] = None
+
+
+class PolicyHolderDeleteResponse(SQLModel):
+    """Schema for deleting a PolicyHolder"""
+    success: bool
+    message: str
+    data: Optional[PolicyHolderRead] = None

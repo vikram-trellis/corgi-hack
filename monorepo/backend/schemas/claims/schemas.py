@@ -34,7 +34,7 @@ class ClaimCreate(ClaimBase):
     coverage_limit: Optional[float] = None
     
     # Metadata
-    metadata: Optional[Dict[str, Any]] = None
+    claim_metadata: Optional[Dict[str, Any]] = None
 
 class ClaimRead(ClaimBase):
     """Schema for reading a claim, includes all fields including generated ones"""
@@ -57,7 +57,7 @@ class ClaimRead(ClaimBase):
     matched_by: Optional[str] = None
     
     # Metadata
-    metadata: Optional[Dict[str, Any]] = None
+    claim_metadata: Optional[Dict[str, Any]] = None
     
     # Timestamps
     created_at: datetime
@@ -79,7 +79,7 @@ class ClaimUpdate(SQLModel):
     ingest_method: Optional[str] = None
     
     # Relationships
-    policyholder_id: Optional[str] = None
+    id: Optional[str] = None
     policy_id: Optional[str] = None
     
     # Enriched or derived fields
@@ -94,7 +94,7 @@ class ClaimUpdate(SQLModel):
     matched_by: Optional[str] = None
     
     # Metadata
-    metadata: Optional[Dict[str, Any]] = None
+    claim_metadata: Optional[Dict[str, Any]] = None
 
 class ClaimResponse(SQLModel):
     """Base response schema for claim operations"""

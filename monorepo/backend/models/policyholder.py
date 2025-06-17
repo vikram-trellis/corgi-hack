@@ -11,7 +11,7 @@ from .base import TimestampModel
 if TYPE_CHECKING:
     from .autoupload_email import AutouploadEmail
 
-def generate_policyholder_id() -> str:
+def generate_id() -> str:
     """Generate a prefixed unique ID for policyholders"""
     return f"ph_{uuid.uuid4().hex[:8]}"
 
@@ -27,10 +27,10 @@ class PolicyHolder(SQLModel, table=True):
     __tablename__ = "policyholders"
     
     id: str = Field(
-        default_factory=generate_policyholder_id,
+        default_factory=generate_id,
         sa_column=Column(VARCHAR(length=50), nullable=False, primary_key=True)
     )
-    # first_name: str = Field(index=True)
+    first_name: str = Field(index=True)
     last_name: str = Field(index=True)
     date_of_birth: date
     email: EmailStr = Field(unique=True, index=True)

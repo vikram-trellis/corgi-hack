@@ -4,39 +4,39 @@ from fastapi import Depends
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from database import AsyncSessionDep
+from database import get_async_session
 from models import PolicyHolder
 from schemas import PolicyHolderCreate, PolicyHolderUpdate
 from .base import BaseRepository
 
 class PolicyHolderRepository(BaseRepository[PolicyHolder]):
-    def __init__(self, session: AsyncSession = Depends(AsyncSessionDep)):
+    def __init__(self, session: AsyncSession = Depends(get_async_session)):
         super().__init__(session, PolicyHolder)
     
-    async def get_by_policyholder_id(self, policyholder_id: str) -> Optional[PolicyHolder]:
-        """Get policyholder by their unique policyholder_id"""
-        return await self.get_by_field("policyholder_id", policyholder_id)
+    async def get_by_id(self, id: str) -> Optional[PolicyHolder]:
+        """Get policyholder by their unique id"""
+        return await self.get_by_field("id", id)
     
     async def get_by_email(self, email: str) -> Optional[PolicyHolder]:
         """Get policyholder by email address"""
         return await self.get_by_field("email", email)
     
     async def create_policyholder(self, policyholder: PolicyHolderCreate) -> PolicyHolder:
-        """Create a new policyholder with auto-generated policyholder_id"""
+        """Create a new policyholder with auto-generated id"""
         # Generate a unique policyholder ID with PH prefix
-        policyholder_id = f"PH{uuid.uuid4().hex[:6].upper()}"
+        id = f"PH{uuid.uuid4().hex[:6].upper()}"
         
-        # Convert to dict and add policyholder_id
+        # Convert to dict and add id
         policyholder_data = policyholder.model_dump()
-        policyholder_data["policyholder_id"] = policyholder_id
+        policyholder_data["id"] = id
         
         # Create the policyholder
         return await self.create(policyholder_data)
     
-    async def update_policyholder(self, policyholder_id: str, policyholder: PolicyHolderUpdate) -> Optional[PolicyHolder]:
-        """Update a policyholder by policyholder_id"""
-        # First, get the policyholder by policyholder_id
-        db_policyholder = await self.get_by_policyholder_id(policyholder_id)
+    async def update_policyholder(self, id: str, policyholder: PolicyHolderUpdate) -> Optional[PolicyHolder]:
+        """Update a policyholder by id"""
+        # First, get the policyholder by id
+        db_policyholder = await self.get_by_id(id)
         if db_policyholder is None:
             return None
         
@@ -51,9 +51,9 @@ class PolicyHolderRepository(BaseRepository[PolicyHolder]):
         await self.session.refresh(db_policyholder)
         return db_policyholder
     
-    async def delete_policyholder(self, policyholder_id: str) -> bool:
-        """Delete a policyholder by policyholder_id"""
-        db_policyholder = await self.get_by_policyholder_id(policyholder_id)
+    async def delete_policyholder(self, id: str) -> bool:
+        """Delete a policyholder by id"""
+        db_policyholder = await self.get_by_id(id)
         if db_policyholder is None:
             return False
         

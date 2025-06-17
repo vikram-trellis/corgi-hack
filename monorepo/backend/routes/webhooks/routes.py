@@ -3,9 +3,15 @@ from starlette.requests import Request
 import logging
 import os
 from dotenv import load_dotenv
+from datetime import date, datetime
 
 from schemas.webhooks import MailgunWebhook, WebhookResponse
+from schemas.inbox.schemas import InboxCreate
+from schemas.documents.schemas import DocumentCreate
 from services import GeminiService
+from services.supabase import SupabaseService
+from repositories.inbox import InboxRepository
+from repositories.document import DocumentRepository
 
 # Get environment variables
 load_dotenv()
@@ -22,6 +28,9 @@ async def mailgun_webhook(
     request: Request,
     auth_token: str = Query(..., description="Authentication token for Mailgun webhooks"),
     gemini_service: GeminiService = Depends(lambda: GeminiService()),
+    supabase_service: SupabaseService = Depends(lambda: SupabaseService()),
+    inbox_repo: InboxRepository = Depends(),
+    document_repo: DocumentRepository = Depends(),
 ):
     """
     Webhook endpoint for receiving email data from Mailgun.
@@ -56,6 +65,32 @@ async def mailgun_webhook(
         attachment_names = []
         attachment_urls = []
         attachment_analysis = []
+        supabase_urls = []
+        
+        # Create inbox item with dummy data
+        inbox_data = InboxCreate(
+            first_name="John",
+            last_name="Doe",
+            date_of_birth=date(1980, 1, 1),
+            event_type="collision",
+            event_date=date.today(),
+            event_location="123 Main St, Anytown, USA",
+            damage_description="Vehicle was involved in a minor fender-bender while parked.",
+            contact_email=mailgun_data.sender,
+            photos=[],  # Will be updated with Supabase URLs
+            raw_email_content=mailgun_data.body_plain,
+            email_subject=mailgun_data.subject,
+            email_sender=mailgun_data.sender,
+            claim_metadata={
+                "source": "mailgun_webhook",
+                "received_at": datetime.utcnow().isoformat(),
+                "recipient": mailgun_data.recipient
+            }
+        )
+        
+        # Create the inbox item
+        inbox_item = await inbox_repo.create_inbox_item(inbox_data.dict())
+        logger.info(f"Created inbox item with ID: {inbox_item.id}")
         
         if mailgun_data.attachments:
             for attachment in mailgun_data.attachments:
@@ -77,12 +112,38 @@ async def mailgun_webhook(
                 logger.info(f"Attachment: {attachment_name} ({attachment.content_type}, {attachment.size} bytes)")
                 logger.info(f"Attachment URL: {authenticated_url}")
                 
+                # Upload file to Supabase
+                try:
+                    supabase_url = await supabase_service.upload_file_from_url(
+                        authenticated_url, 
+                        f"{inbox_item.id}_{attachment_name}"
+                    )
+                    
+                    if supabase_url:
+                        supabase_urls.append(supabase_url)
+                        logger.info(f"Uploaded to Supabase: {supabase_url}")
+                        
+                        # Create document entry
+                        document_data = DocumentCreate(
+                            file_name=attachment_name,
+                            file_type=attachment.content_type,
+                            file_url=supabase_url,
+                            inbox_id=inbox_item.id
+                        )
+                        
+                        document = await document_repo.create_document(document_data)
+                        logger.info(f"Created document entry with ID: {document.id}")
+                except Exception as e:
+                    logger.error(f"Error uploading file to Supabase: {str(e)}")
+
+
                 # Use Gemini to analyze the attachment type based on filename
                 try:
                     analysis = await gemini_service.analyze_attachment_type(attachment_name)
                     attachment_analysis.append({
                         "filename": attachment_name,
                         "url": authenticated_url,
+                        "supabase_url": supabase_url if 'supabase_url' in locals() else None,
                         "content_type": attachment.content_type,
                         "size": attachment.size,
                         "analysis": analysis
@@ -90,6 +151,10 @@ async def mailgun_webhook(
                     logger.info(f"Analyzed attachment: {attachment_name} - Type: {analysis.get('document_type', 'unknown')}")
                 except Exception as e:
                     logger.error(f"Error analyzing attachment {attachment_name}: {str(e)}")
+            
+            # Update inbox item with photo URLs if any were uploaded
+            if supabase_urls:
+                await inbox_repo.update(inbox_item.id, {"photos": supabase_urls})
         
         # If there's email body content, analyze it with Gemini
         email_analysis = None
@@ -111,11 +176,16 @@ async def mailgun_webhook(
                     "subject": mailgun_data.subject,
                     "timestamp": mailgun_data.timestamp,
                 },
+                "inbox_item": {
+                    "id": inbox_item.id,
+                    "claim_id": inbox_item.claim_id
+                },
                 "attachments": [
                     {
                         "name": name,
-                        "url": url
-                    } for name, url in zip(attachment_names, attachment_urls)
+                        "url": url,
+                        "supabase_url": supabase_url if idx < len(supabase_urls) else None
+                    } for idx, (name, url, supabase_url) in enumerate(zip(attachment_names, attachment_urls, supabase_urls + [None] * (len(attachment_names) - len(supabase_urls))))
                 ],
                 "email_analysis": email_analysis,
                 "attachment_analysis": attachment_analysis

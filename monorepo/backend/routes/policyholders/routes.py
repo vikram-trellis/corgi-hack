@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 
+from schemas.policyholders.schemas import PolicyHolderDeleteResponse
 from repositories import PolicyHolderRepository
 from schemas import PolicyHolderCreate, PolicyHolderRead, PolicyHolderUpdate
 
@@ -11,6 +12,7 @@ async def create_policyholder(
     policyholder: PolicyHolderCreate, 
     repo: PolicyHolderRepository = Depends()
 ):
+
     """
     Create a new policyholder.
     """
@@ -33,22 +35,22 @@ async def read_policyholders(
     """
     return await repo.list_policyholders(skip=skip, limit=limit)
 
-@router.get("/{policyholder_id}", response_model=PolicyHolderRead)
+@router.get("/{id}", response_model=PolicyHolderRead)
 async def read_policyholder(
-    policyholder_id: str, 
+    id: str, 
     repo: PolicyHolderRepository = Depends()
 ):
     """
     Get a specific policyholder by ID.
     """
-    db_policyholder = await repo.get_by_policyholder_id(policyholder_id=policyholder_id)
+    db_policyholder = await repo.get_by_id(id=id)
     if db_policyholder is None:
         raise HTTPException(status_code=404, detail="Policyholder not found")
     return db_policyholder
 
-@router.patch("/{policyholder_id}", response_model=PolicyHolderRead)
+@router.patch("/{id}", response_model=PolicyHolderRead)
 async def update_policyholder(
-    policyholder_id: str, 
+    id: str, 
     policyholder: PolicyHolderUpdate, 
     repo: PolicyHolderRepository = Depends()
 ):
@@ -56,22 +58,26 @@ async def update_policyholder(
     Update a policyholder's information.
     """
     db_policyholder = await repo.update_policyholder(
-        policyholder_id=policyholder_id, 
+        id=id, 
         policyholder=policyholder
     )
     if db_policyholder is None:
         raise HTTPException(status_code=404, detail="Policyholder not found")
     return db_policyholder
 
-@router.delete("/{policyholder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", response_model=PolicyHolderDeleteResponse)
 async def delete_policyholder(
-    policyholder_id: str, 
+    id: str, 
     repo: PolicyHolderRepository = Depends()
 ):
     """
     Delete a policyholder.
     """
-    success = await repo.delete_policyholder(policyholder_id=policyholder_id)
+    success = await repo.delete_policyholder(id=id)
     if not success:
         raise HTTPException(status_code=404, detail="Policyholder not found")
-    return None
+    return PolicyHolderDeleteResponse(
+        success=True,
+        message="Policyholder deleted successfully", 
+        data=None,
+    )

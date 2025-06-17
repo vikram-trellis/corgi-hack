@@ -330,7 +330,7 @@ class GeminiService:
             contents = [
                 types.Content(
                     role="user",
-                    parts=[types.Part.from_text(prompt)]
+                    parts=[types.Part(text=prompt)]
                 )
             ]
             
@@ -418,4 +418,64 @@ class GeminiService:
                 "priority": "medium",
                 "confidence": 0.5,
                 "notes": response_text.strip()
+            }
+            
+    async def extract_email_data(self, email_content: str) -> Dict[str, Any]:
+        """
+        Extract structured data from email content using Gemini AI
+        
+        Args:
+            email_content: The plain text content of the email
+            
+        Returns:
+            Dictionary containing extracted information from the email
+        """
+        try:
+            # Prepare prompt for Gemini
+            prompt = f"""
+            Analyze the following email content and extract key information related to an insurance claim.
+            Please identify the following information if present:
+            - Topic or subject matter
+            - Claim type (e.g., auto, home, health)
+            - Incident date
+            - Incident location
+            - Damage description
+            - Contact information
+            - Urgency level
+            - Any specific requests
+            
+            Email content:
+            ```
+            {email_content}
+            ```
+            
+            Return the information in JSON format with the following structure:
+            {{"topic": "...", "claim_type": "...", "incident_date": "...", "incident_location": "...", "damage_description": "...", "contact_info": "...", "urgency": "...", "requests": "..."}}
+            """
+            
+            # Call Gemini API
+            response_text = await self.generate_text(prompt)
+            
+            # Extract JSON from the response
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = response_text[json_start:json_end]
+                return json.loads(json_str)
+            else:
+                logger.warning("No valid JSON found in Gemini response for email analysis")
+                return {
+                    "topic": "Unknown",
+                    "claim_type": "general",
+                    "urgency": "medium",
+                    "notes": response_text.strip()
+                }
+        except Exception as e:
+            logger.error(f"Error analyzing email content: {str(e)}")
+            return {
+                "topic": "Error analyzing email",
+                "claim_type": "unknown",
+                "urgency": "medium",
+                "notes": "Failed to analyze email content"
             }

@@ -64,7 +64,7 @@ Claims are reviewed against the policy's terms and conditions. An example policy
     "natural_disaster",
     "falling_object",
     "animal_collision"
-  ], 
+  ],
   "exclusions": [
     "driver_under_influence",
     "intentional_damage",
@@ -77,16 +77,16 @@ Claims are reviewed against the policy's terms and conditions. An example policy
 
 The system will handle various coverage types as summarized below:
 
-| Coverage Type | What It Covers | Mandatory? |
-| --- | --- | --- |
-| Liability (BI/PD) | Injuries/damage to others | Yes (in most states) |
-| Collision | Your car in collisions | No |
-| Comprehensive | Non-collision events (theft, fire, animals) | No |
-| PIP / MedPay | Medical costs for you/passengers | Yes (in no-fault states) |
-| UM / UIM | Costs if other driver is uninsured/underinsured | Sometimes |
-| Gap | Loan/lease difference on totaled car | No |
-| Rental Reimbursement | Cost of temporary rental car | No |
-| Roadside Assistance | Towing, lockouts, battery, etc. | No |
+| Coverage Type        | What It Covers                                  | Mandatory?               |
+| -------------------- | ----------------------------------------------- | ------------------------ |
+| Liability (BI/PD)    | Injuries/damage to others                       | Yes (in most states)     |
+| Collision            | Your car in collisions                          | No                       |
+| Comprehensive        | Non-collision events (theft, fire, animals)     | No                       |
+| PIP / MedPay         | Medical costs for you/passengers                | Yes (in no-fault states) |
+| UM / UIM             | Costs if other driver is uninsured/underinsured | Sometimes                |
+| Gap                  | Loan/lease difference on totaled car            | No                       |
+| Rental Reimbursement | Cost of temporary rental car                    | No                       |
+| Roadside Assistance  | Towing, lockouts, battery, etc.                 | No                       |
 
 ## 4. Claims Adjudication
 
@@ -126,7 +126,7 @@ Throughout the process, customers are kept up-to-date via email, SMS, and PhoneC
 
 ```json
 {
-  "policyholder_id": "PH123456",
+  "id": "PH123456",
   "first_name": "Alex",
   "last_name": "Rivera",
   "date_of_birth": "1985-07-21",
@@ -142,7 +142,6 @@ Throughout the process, customers are kept up-to-date via email, SMS, and PhoneC
   "status": "active"
 }
 ```
-
 
 ### Claims Schema (Incoming and unpopulated)
 
@@ -166,7 +165,7 @@ Throughout the process, customers are kept up-to-date via email, SMS, and PhoneC
   "ingest_method": "Email" or "Manual",
 
   // 🆕 Enriched or derived fields
-  "policyholder_id": "PH001",
+  "id": "PH001",
   "policy_id": "AUTO123",
   "coverage_type": "comprehensive",
   "policy_effective_date": "2025-01-01",

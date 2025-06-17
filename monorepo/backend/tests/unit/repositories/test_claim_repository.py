@@ -155,7 +155,7 @@ async def test_associate_with_policyholder(claim_repository, mock_session, sampl
     
     result = await claim_repository.associate_with_policyholder(
         "CLM12345678", 
-        policyholder_id=42,
+        id=42,
         policy_id="POL987654",
         matched_by="email_match"
     )
@@ -163,7 +163,7 @@ async def test_associate_with_policyholder(claim_repository, mock_session, sampl
     assert mock_session.execute.called
     assert mock_session.commit.called
     assert mock_session.refresh.called
-    assert result.policyholder_id == 42
+    assert result.id == 42
     assert result.policy_id == "POL987654"
     assert result.matched_by == "email_match"
 
@@ -185,7 +185,7 @@ async def test_search_claims(claim_repository, mock_session):
             photos=["photo1.jpg"],
             contact_email="john.doe@example.com",
             claim_status=ClaimStatus.submitted,
-            policyholder_id=42,
+            id=42,
         ),
         Claim(
             id=2,
@@ -200,7 +200,7 @@ async def test_search_claims(claim_repository, mock_session):
             photos=["photo3.jpg"],
             contact_email="jane.smith@example.com",
             claim_status=ClaimStatus.pending_review,
-            policyholder_id=43,
+            id=43,
         )
     ]
     
@@ -222,7 +222,7 @@ async def test_search_claims(claim_repository, mock_session):
     
     # Test search with various filters
     result, total = await claim_repository.search_claims(
-        policyholder_id=42,
+        id=42,
         status=ClaimStatus.submitted,
         event_type=EventType.collision,
         name_search="John",

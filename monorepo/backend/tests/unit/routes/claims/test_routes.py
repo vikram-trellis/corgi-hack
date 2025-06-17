@@ -258,14 +258,14 @@ def test_associate_with_policyholder(client, mock_claim_repository, mock_policyh
     
     # Mock the associate_with_policyholder method
     associated_claim = sample_claim
-    associated_claim.policyholder_id = 42
+    associated_claim.id = 42
     associated_claim.policy_id = "POL987654"
     associated_claim.matched_by = "email_match"
     mock_claim_repository.associate_with_policyholder.return_value = associated_claim
     
     # Associate the claim with a policyholder
     associate_data = {
-        "policyholder_id": 42,
+        "id": 42,
         "policy_id": "POL987654",
         "matched_by": "email_match"
     }
@@ -275,7 +275,7 @@ def test_associate_with_policyholder(client, mock_claim_repository, mock_policyh
     # Check the response
     assert response.status_code == 200
     assert response.json()["success"] is True
-    assert response.json()["data"]["policyholder_id"] == 42
+    assert response.json()["data"]["id"] == 42
     
     # Check that the repository methods were called
     mock_policyholder_repository.get_by_id.assert_called_once_with(42)
@@ -291,7 +291,7 @@ def test_associate_with_nonexistent_policyholder(client, mock_claim_repository, 
     
     # Associate the claim with a policyholder
     associate_data = {
-        "policyholder_id": 99,
+        "id": 99,
         "policy_id": "POL987654",
         "matched_by": "email_match"
     }
