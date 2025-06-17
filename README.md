@@ -163,6 +163,7 @@ Throughout the process, customers are kept up-to-date via email, SMS, and PhoneC
     "https://demo.insure/photos/deer_hit_2.jpg"
   ],
   "contact_email": "alex.rivera@email.com",
+  "ingest_method": "Email" or "Manual",
 
   // 🆕 Enriched or derived fields
   "policyholder_id": "PH001",
