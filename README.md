@@ -1,5 +1,3 @@
-# corgi-hack
-
 # Auto-Insurance Claims Management System Project Specification
 
 ## 1. Introduction
