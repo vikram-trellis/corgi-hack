@@ -126,3 +126,23 @@ Additional documentation and investigation may be required, including:
 
 Throughout the process, customers are kept up-to-date via email, SMS, and PhoneCall.
 
+### Identity Schema
+
+```json
+{
+  "policyholder_id": "PH123456",
+  "first_name": "Alex",
+  "last_name": "Rivera",
+  "date_of_birth": "1985-07-21",
+  "email": "alex.rivera@email.com",
+  "phone": "+1-555-123-4567",
+  "address": {
+    "street": "123 Maple St",
+    "city": "San Mateo",
+    "state": "CA",
+    "zip": "94401"
+  },
+  "linked_policies": ["AUTO123456", "RENTER789101"],
+  "status": "active"
+}
+```
