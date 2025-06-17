@@ -1,0 +1,89 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "policyholder_info": {
+      "type": "OBJECT",
+      "description": "Extract key information about the policyholder from the document",
+      "properties": {
+        "name": {
+          "type": "STRING",
+          "description": "Full name of the policyholder"
+        },
+        "email": {
+          "type": "STRING",
+          "description": "Email address of the policyholder"
+        },
+        "phone": {
+          "type": "STRING",
+          "description": "Phone number of the policyholder"
+        },
+        "address": {
+          "type": "OBJECT",
+          "description": "Address of the policyholder",
+          "properties": {
+            "street": {
+              "type": "STRING",
+              "description": "Street address including house/apartment number"
+            },
+            "city": {
+              "type": "STRING",
+              "description": "City name"
+            },
+            "state": {
+              "type": "STRING",
+              "description": "State or province"
+            },
+            "zip": {
+              "type": "STRING",
+              "description": "ZIP or postal code"
+            }
+          }
+        },
+        "date_of_birth": {
+          "type": "STRING",
+          "description": "Date of birth in YYYY-MM-DD format"
+        }
+      },
+      "required": ["name"]
+    },
+    "policy_details": {
+      "type": "ARRAY",
+      "description": "Details of any insurance policies mentioned in the document",
+      "items": {
+        "type": "OBJECT",
+        "properties": {
+          "policy_number": {
+            "type": "STRING",
+            "description": "The policy identification number"
+          },
+          "policy_type": {
+            "type": "STRING",
+            "description": "Type of insurance policy (auto, home, life, etc.)"
+          },
+          "start_date": {
+            "type": "STRING",
+            "description": "Policy start date in YYYY-MM-DD format"
+          },
+          "end_date": {
+            "type": "STRING",
+            "description": "Policy end date in YYYY-MM-DD format"
+          },
+          "premium_amount": {
+            "type": "NUMBER",
+            "description": "Premium amount in dollars"
+          }
+        },
+        "required": ["policy_number", "policy_type"]
+      }
+    },
+    "document_type": {
+      "type": "STRING",
+      "description": "Type of document (policy declaration, bill, claim form, etc.)"
+    },
+    "document_date": {
+      "type": "STRING",
+      "description": "Date of the document in YYYY-MM-DD format"
+    }
+  },
+  "required": ["document_type"]
+}

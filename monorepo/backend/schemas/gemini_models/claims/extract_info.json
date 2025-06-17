@@ -1,0 +1,109 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "claim_info": {
+      "type": "OBJECT",
+      "description": "Extract key information about the insurance claim from the document",
+      "properties": {
+        "claimant_name": {
+          "type": "STRING",
+          "description": "Full name of the person filing the claim"
+        },
+        "date_of_birth": {
+          "type": "STRING",
+          "description": "Date of birth of the claimant in YYYY-MM-DD format"
+        },
+        "event_type": {
+          "type": "STRING",
+          "description": "Type of incident (collision, theft, animal collision, fire, etc.)"
+        },
+        "event_date": {
+          "type": "STRING",
+          "description": "Date of the incident in YYYY-MM-DD format"
+        },
+        "event_location": {
+          "type": "STRING",
+          "description": "Location where the incident occurred"
+        },
+        "vehicle_info": {
+          "type": "OBJECT",
+          "description": "Information about the vehicle involved",
+          "properties": {
+            "make": {
+              "type": "STRING",
+              "description": "Vehicle make"
+            },
+            "model": {
+              "type": "STRING",
+              "description": "Vehicle model"
+            },
+            "year": {
+              "type": "STRING",
+              "description": "Vehicle year"
+            },
+            "vin": {
+              "type": "STRING",
+              "description": "Vehicle Identification Number"
+            }
+          }
+        },
+        "damage_description": {
+          "type": "STRING",
+          "description": "Description of the damage or loss"
+        },
+        "estimated_amount": {
+          "type": "NUMBER",
+          "description": "Estimated damage amount in dollars"
+        },
+        "contact_info": {
+          "type": "OBJECT",
+          "description": "Contact information for the claimant",
+          "properties": {
+            "email": {
+              "type": "STRING",
+              "description": "Email address"
+            },
+            "phone": {
+              "type": "STRING",
+              "description": "Phone number"
+            }
+          }
+        }
+      },
+      "required": ["claimant_name", "event_type"]
+    },
+    "policy_info": {
+      "type": "OBJECT",
+      "description": "Information about the insurance policy",
+      "properties": {
+        "policy_number": {
+          "type": "STRING",
+          "description": "Policy number or ID"
+        },
+        "coverage_type": {
+          "type": "STRING",
+          "description": "Type of coverage (comprehensive, collision, liability, etc.)"
+        },
+        "policyholder_name": {
+          "type": "STRING",
+          "description": "Name of the policyholder (may be different from claimant)"
+        }
+      }
+    },
+    "document_info": {
+      "type": "OBJECT",
+      "description": "Information about the document itself",
+      "properties": {
+        "document_type": {
+          "type": "STRING",
+          "description": "Type of document (claim form, accident report, police report, etc.)"
+        },
+        "document_date": {
+          "type": "STRING",
+          "description": "Date the document was created or filed in YYYY-MM-DD format"
+        }
+      }
+    }
+  },
+  "required": ["claim_info"]
+}

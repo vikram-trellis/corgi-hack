@@ -1,0 +1,91 @@
+{
+  "type": "OBJECT",
+  "properties": {
+    "claim_analysis": {
+      "type": "OBJECT",
+      "description": "Analysis of an insurance claim document",
+      "properties": {
+        "claim_number": {
+          "type": "STRING",
+          "description": "The claim identification number"
+        },
+        "policy_number": {
+          "type": "STRING",
+          "description": "The associated policy number"
+        },
+        "claim_type": {
+          "type": "STRING",
+          "description": "Type of claim (auto accident, property damage, medical, etc.)"
+        },
+        "incident_date": {
+          "type": "STRING",
+          "description": "Date of the incident in YYYY-MM-DD format"
+        },
+        "filing_date": {
+          "type": "STRING",
+          "description": "Date the claim was filed in YYYY-MM-DD format"
+        },
+        "claim_amount": {
+          "type": "NUMBER",
+          "description": "Amount claimed in dollars"
+        },
+        "status": {
+          "type": "STRING",
+          "description": "Current status of the claim (submitted, under review, approved, denied, etc.)"
+        },
+        "involved_parties": {
+          "type": "ARRAY",
+          "description": "List of parties involved in the claim",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "name": {
+                "type": "STRING",
+                "description": "Name of the involved party"
+              },
+              "role": {
+                "type": "STRING",
+                "description": "Role in the claim (claimant, witness, etc.)"
+              },
+              "contact_info": {
+                "type": "STRING",
+                "description": "Contact information if available"
+              }
+            }
+          }
+        },
+        "description": {
+          "type": "STRING",
+          "description": "Description of the incident or claim"
+        }
+      },
+      "required": ["claim_number", "claim_type"]
+    },
+    "risk_assessment": {
+      "type": "OBJECT",
+      "description": "AI assessment of claim risk factors",
+      "properties": {
+        "fraud_risk": {
+          "type": "STRING",
+          "description": "Assessment of potential fraud (low, medium, high)"
+        },
+        "complexity": {
+          "type": "STRING",
+          "description": "Assessment of claim complexity (simple, moderate, complex)"
+        },
+        "estimated_processing_time": {
+          "type": "STRING",
+          "description": "Estimated time to process this claim (days/weeks)"
+        },
+        "risk_factors": {
+          "type": "ARRAY",
+          "description": "List of identified risk factors",
+          "items": {
+            "type": "STRING"
+          }
+        }
+      }
+    }
+  },
+  "required": ["claim_analysis"]
+}

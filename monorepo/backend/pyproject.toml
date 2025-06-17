@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = "FastAPI backend for corgi-hack project"
+authors = ["Vikram Khandelwal <vikram@runtrellis.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+fastapi = "^0.111.0"
+uvicorn = "^0.29.0"
+python-dotenv = "^1.0.1"
+alembic = "^1.16.2"
+sqlalchemy = "^2.0.41"
+psycopg2-binary = "^2.9.10"
+pydantic-extra-types = "^2.10.5"
+pydantic = {extras = ["email"], version = "^2.11.7"}
+sqlmodel = "^0.0.24"
+asyncpg = "^0.30.0"
+greenlet = "^3.2.3"
+google-generativeai = "^0.8.5"
+google-auth = "^2.40.3"
+google-cloud-aiplatform = "^1.97.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "uvicorn:run(app='main:app', host='0.0.0.0', port=8000, reload=True)"
+test = "pytest:main"
